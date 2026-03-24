@@ -7,3 +7,6 @@
 # Wrangler local state
 .wrangler/
 
+
+# macOS metadata
+.DS_Store
