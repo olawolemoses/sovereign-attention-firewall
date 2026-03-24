@@ -10,6 +10,8 @@ The **Sovereign Attention Firewall** is an automated enforcement system designed
 
 The firewall operates as a distributed security circuit between Google Workspace, a custom Cloudflare-hosted MCP, and Notion.
 
+![System Architecture](./system_architecture.png)
+
 ### 1. The Oracle & Bouncer (Verification)
 
 When a new external invite is received in Google Workspace, the Notion Agent initiates an audit using the **Sovereign Bouncer** (Custom MCP).
@@ -28,6 +30,8 @@ Unverified contacts (**Identity Phantoms**) or meetings tied to archived project
 ### 3. The Enforcement Engine (Execution)
 
 Final actions are executed through a multi-path Zapier webhook bridge.
+
+![Zapier Enforcement Structure](./zapier-enforcement/Zapier-Enforcement-Structure.png)
 
 - **Path A (Block):** Deletes the calendar event and permanently scrubs the source email from Gmail.
 - **Path B (Approve):** Formally accepts the RSVP via a `PATCH` request to preserve event metadata.
