@@ -60,7 +60,10 @@ cd identity-oracle
 wrangler deploy
 ```
 
-Copy the Oracle URL from deploy output, then prepare the bouncer:
+Copy the Oracle URL from deploy output (for example: `https://identity-oracle.<your-subdomain>.workers.dev`).  
+You will use this value as `IDENTITY_ORACLE_URL` in bouncer secrets.
+
+Then prepare the bouncer:
 
 ```bash
 cd sovereign-bouncer-mcp
