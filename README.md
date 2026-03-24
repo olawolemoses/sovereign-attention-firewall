@@ -10,7 +10,7 @@ The **Sovereign Attention Firewall** is an automated enforcement system designed
 
 The firewall operates as a distributed security circuit between Google Workspace, a custom Cloudflare-hosted MCP, Notion, and Zapier.
 
-![System Architecture](./system_architecture.png)
+![System Architecture](./assets/system_architecture.png)
 
 ### 1. The Oracle & Bouncer (Verification)
 
@@ -31,15 +31,18 @@ Unverified contacts (**Identity Phantoms**) or meetings tied to archived project
 
 Final actions are executed through a multi-path Zapier webhook bridge.
 
-![Zapier Enforcement Structure](./zapier-enforcement/Zapier-Enforcement-Structure.png)
+![Zapier Enforcement Structure](./assets/Zapier-Enforcement-Structure.png)
 
 - **Path A (Block):** Deletes the calendar event and permanently scrubs the source email from Gmail.
-- **Path B (Approve):** Formally accepts the RSVP via a `PATCH` request to preserve event metadata.
-- **Path C (Reject):** Formally declines the invite, signaling a professional boundary.
+- **Path B (Approve):** Formally accepts the RSVP via a `PATCH` request to preserve event metadata.  
+  Code: [`zapier-enforcement/mark-event-accepted.ts`](./zapier-enforcement/mark-event-accepted.ts)
+- **Path C (Reject):** Formally declines the invite, signaling a professional boundary.  
+  Code: [`zapier-enforcement/mark-event-declined.ts`](./zapier-enforcement/mark-event-declined.ts)
 
 ## 📂 Repository Structure
 
 ```bash
+├── /assets                     # Architecture and enforcement diagrams for README
 ├── /identity-oracle            # Cloudflare Worker: Identity Source of Truth
 ├── /sovereign-bouncer-mcp      # Cloudflare Worker: Custom MCP Server & KV Caching
 ├── /notion-governance          # Agent Instructions (The Constitution) & DB Schemas
