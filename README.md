@@ -91,10 +91,9 @@ Connect the Notion MCP to your workspace and configure Calendar Shield as the or
 - Create a **Calendar Shield** hub page and embed live views for governance databases.
 - Import and configure:
   - **🛡️ Sovereign Policy DB** (policy definitions, active state, metrics)
-  - **📥 Waiting Room DB** (review queue + audit trail)
+  - **📥 Waiting Room DB** (review queue + audit trail + human-in-the-loop decisioning)
   - **🚫 Block List DB** (persistent deny list by sender/domain)
   - **📂 Projects DB** (used for Ghost Project detection)
-  - **📅 Proposed Meetings DB** (human-in-the-loop decisioning)
 - Add `instructions.md` (The Constitution) to the Agent system prompt.
 - Configure integrations:
   - **Google Calendar (Notion Calendar):** read + write for next-24h scanning and enforcement actions
