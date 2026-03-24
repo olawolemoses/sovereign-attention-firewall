@@ -33,10 +33,10 @@ Final actions are executed through a multi-path Zapier webhook bridge.
 
 ![Zapier Enforcement Structure](./assets/Zapier-Enforcement-Structure.png)
 
-- **Path A (Block):** Deletes the calendar event and permanently scrubs the source email from Gmail.
+- **Path A (Reject/Block):** Deletes the calendar event and permanently scrubs the source email from Gmail.
 - **Path B (Approve):** Formally accepts the RSVP via a `PATCH` request to preserve event metadata.  
   Code: [`zapier-enforcement/mark-event-accepted.ts`](./zapier-enforcement/mark-event-accepted.ts)
-- **Path C (Reject):** Formally declines the invite, signaling a professional boundary.  
+- **Path C (Cancel):** Formally declines the invite, signaling a professional boundary.  
   Code: [`zapier-enforcement/mark-event-declined.ts`](./zapier-enforcement/mark-event-declined.ts)
 
 ## 📂 Repository Structure
