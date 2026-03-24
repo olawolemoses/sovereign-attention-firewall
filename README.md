@@ -8,7 +8,7 @@ The **Sovereign Attention Firewall** is an automated enforcement system designed
 
 ## 🏛️ System Architecture
 
-The firewall operates as a distributed security circuit between Google Workspace, a custom Cloudflare-hosted MCP, and Notion.
+The firewall operates as a distributed security circuit between Google Workspace, a custom Cloudflare-hosted MCP, Notion, and Zapier.
 
 ![System Architecture](./system_architecture.png)
 
