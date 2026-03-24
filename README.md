@@ -86,9 +86,9 @@ It is used as the **Bearer token** in **Notion Custom MCP authentication** (the 
 
 ### 2. Notion Agent
 
-Connect the Notion MCP to your workspace and configure Calendar Shield as the orchestration layer.
+Connect the Notion MCP to your workspace and configure Sovereign Attention Firewall as the orchestration layer.
 
-- Create a **Calendar Shield** hub page and embed live views for governance databases.
+- Create a **Sovereign Attention Firewall** hub page and embed live views for governance databases.
 - Import and configure:
   - **🛡️ Sovereign Policy DB** (policy definitions, active state, metrics)
   - **📥 Waiting Room DB** (review queue + audit trail + human-in-the-loop decisioning)
