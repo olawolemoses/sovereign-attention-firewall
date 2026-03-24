@@ -81,6 +81,9 @@ wrangler secret put IDENTITY_ORACLE_URL
 wrangler deploy
 ```
 
+`SOVEREIGN_SECRET` is your private shared token for the Sovereign Bouncer.  
+It is used as the **Bearer token** in **Notion Custom MCP authentication** (the token you paste into Notion when connecting the MCP server).
+
 ### 2. Notion Agent
 
 Connect the Notion MCP to your workspace and configure Calendar Shield as the orchestration layer.
@@ -96,6 +99,10 @@ Connect the Notion MCP to your workspace and configure Calendar Shield as the or
 - Configure integrations:
   - **Google Calendar (Notion Calendar):** read + write for next-24h scanning and enforcement actions
   - **Gmail (Notion Mail):** draft-only verification messages when context is missing
+- For the Custom MCP connection:
+  - MCP URL: your deployed `sovereign-bouncer-mcp` endpoint (typically `/mcp`)
+  - Auth type: **Bearer token**
+  - Token value: the exact `SOVEREIGN_SECRET` you set with `wrangler secret put SOVEREIGN_SECRET`
 - Configure triggers:
   - **Daily recurrence:** 7:00 AM Africa/Lagos (enabled)
   - **Agent mentioned:** on-demand/manual mode (optional)
