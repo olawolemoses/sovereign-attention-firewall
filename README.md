@@ -145,6 +145,51 @@ Create a Zap that receives Notion decisions and executes final enforcement.
 
 One-line operating model: **Notion decides, Zapier enforces.**
 
+## 📸 Notion Governance Screenshots (Placeholders)
+
+Replace the placeholder images below with real Notion screenshots before final submission.
+
+### 1) 🛡️ Sovereign Policy DB (The Constitution)
+
+![Sovereign Policy DB Placeholder](./assets/placeholders/sovereign-policy-db.png)
+
+Show:
+- Policies `P1: Identity Proof`, `P2: Ghost Hunter`, `P3: Context Tax`
+- `Active` checkbox and `Rule` text columns
+
+### 2) 📥 Waiting Room DB (Active Quarantine)
+
+![Waiting Room DB Placeholder](./assets/placeholders/waiting-room-db.png)
+
+Show:
+- Pending events with reasoning (for example: `Policy P2: Ghost Project Detected`)
+- `Decision` dropdown for human-in-the-loop actions
+
+### 3) 📂 Projects DB (Contextual Intelligence)
+
+![Projects DB Placeholder](./assets/placeholders/projects-db.png)
+
+Show:
+- Example projects with status `Archived` or `Completed`
+- Associated keywords used by Ghost Hunter logic
+
+### 4) 🚫 Block List DB (The Wall)
+
+![Block List DB Placeholder](./assets/placeholders/block-list-db.png)
+
+Show:
+- Entries auto-added after two rejections
+- `Times Filtered` and `Auto-Blocked On` properties
+
+### 5) 🛡️ Sovereign Security Log (Daily Brief)
+
+![Sovereign Security Log Placeholder](./assets/placeholders/sovereign-security-log.png)
+
+Show:
+- `Sovereign Security Log - [Date]` page
+- Summary values for Identity Phantoms blocked and Ghost Projects defended
+- Links to Action Required items in Waiting Room
+
 ## ⚖️ The Sovereign Principles (Absolute Rules)
 
 - **Silence is Security:** The system never “declines” a phantom. It deletes silently (`sendUpdates=false`) so spammers never get a signal that your address is active.
