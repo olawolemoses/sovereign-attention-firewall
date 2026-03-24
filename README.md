@@ -108,3 +108,164 @@ wrangler deploy
 ## 🏆 Notion MCP Challenge
 
 This project demonstrates Notion as an orchestration layer for complex, distributed AI systems. By bridging edge compute (Cloudflare) and workplace automation (Zapier), it creates a system that doesn't just organize work; it defends it.
+
+## 🧠 From The Notion Point Of View
+
+### Calendar Shield (Agent) — Submission Description
+
+#### What it is
+
+**Calendar Shield** is a defensive automation agent that protects your calendar from:
+
+- **Identity Phantoms**: events created by **untrusted organizers** (unknown or suspicious senders).
+- **Ghost Projects**: meetings tied to **archived or completed projects**, so they no longer deserve time on the calendar.
+
+It runs on a schedule, scans upcoming meetings, takes silent protective actions, and logs everything for review and auditability.
+
+### 1) Setup (what you create in Notion)
+
+#### Core hub page
+
+- **Calendar Shield** page: the control center where databases are embedded as live views.
+
+#### Databases (and what each one does)
+
+- **🛡️ Sovereign Policy DB**: stores security policies, active state, cadence, trigger counts, and last-trigger timestamps.
+- **📥 Waiting Room DB**: human review queue and audit log per event (sender, event metadata, reasoning, decision state).
+- **🚫 Block List DB**: permanent deny list by sender email or domain, including reason and filter counts.
+- **📂 Projects DB**: project registry for ghost detection; archived/completed matches trigger quarantine.
+- **📅 Proposed Meetings DB**: holding area for decisioning (Pending, Accepted, Declined) in a human-in-the-loop flow.
+
+#### Daily logs
+
+- **Daily Briefs** page: daily pages like `🛡️ Sovereign Security Log - YYYY-MM-DD` with executive summary and action-required sections.
+
+### 2) Connections (integrations) and their purposes
+
+#### Calendar integration (Google Calendar via Notion Calendar)
+
+Purpose:
+
+- Fetch events for the next 24 hours.
+- Take protective actions on events.
+- Operate on primary calendar with write access and skip-confirmation for automation.
+
+#### Mail integration (Gmail via Notion Mail)
+
+Purpose:
+
+- Draft verification emails for context-missing events (e.g., empty descriptions).
+- Draft from `olawoleogunleye@learnd.co`.
+- Sending configured **with confirmation** to prevent accidental outbound mail.
+
+#### Custom MCP tool: SovereignBouncer
+
+Purpose:
+
+- Run organizer trust checks via `verify_email_trust(email=organizerEmail)`.
+- Return:
+  - `shouldQuarantine` (boolean)
+  - `verdict` (string explanation)
+- Quarantine and log event if `shouldQuarantine = true`.
+
+### 3) Triggers (how it runs automatically)
+
+- **Daily recurrence trigger (enabled):** every day at **7:00 AM Africa/Lagos**.
+- **Agent mentioned trigger (disabled):** optional manual/on-demand mode.
+
+### 4) The Flow (end-to-end logic)
+
+#### Phase 0 — Auto-bootstrap policies
+
+If **Sovereign Policy DB** is empty, create defaults:
+
+- **P1: Identity Proof** (quarantine if bouncer says untrusted)
+- **P2: Ghost Hunter** (quarantine if project is archived/completed)
+- **P3: Context Tax** (request verification if description is empty)
+
+#### Step 1 — Scan events (next 24 hours)
+
+- Fetch upcoming 24-hour events.
+- Audit only events where organizer is not the owner.
+
+#### Step 1.25 — Waiting Room cleanup and enforcement (state lock)
+
+- Skip events with non-pending decisions.
+- Refresh timestamps instead of duplicating pending records.
+- Mark pending entries as **Cancelled** if event no longer exists.
+
+#### Step 1.3 — 2-strike escalation (auto-block)
+
+- Auto-add organizer to **Block List DB** after **2+ historical Rejected** decisions.
+
+#### Step 1.5 — Block list hard deny
+
+- Match organizer email/domain against **Block List DB**.
+- Silently remove event (no notifications).
+- Log as **Blocked** in Waiting Room.
+- Increment block list filter counters.
+
+#### Step 2 — Identity audit (SovereignBouncer)
+
+- Call `verify_email_trust`.
+- If quarantined, classify as **Identity Phantom**.
+- Silently quarantine and log with bouncer verdict.
+
+#### Step 3 — Ghost project detection (Projects DB)
+
+- Extract meeting-title keywords.
+- Match against project names/keywords.
+- If matched project is archived/completed, classify as **Ghost Project** and quarantine.
+
+#### Step 4 — Close the loop + Daily Brief
+
+- Draft verification emails for context-missing meetings (manual send).
+- Update policy metrics.
+- Write daily brief with summary, blocked counts, health, and action links.
+
+### Zapier enforcement (webhook) — submission-ready description
+
+Zapier is the execution layer that applies decisions emitted by Calendar Shield.
+
+#### Trigger and router
+
+1. **Webhooks by Zapier — Catch webhook from Notion**
+- Receives event payload from Calendar Shield (Event ID, Calendar ID, Decision, etc.).
+2. **Paths — Split into paths**
+- Routes workflow by decision outcome.
+
+#### Path A — Blocked / Rejected (hard enforcement)
+
+Condition: `Decision = Blocked` or `Decision = Rejected`
+
+Actions:
+
+- Google Calendar: Delete Event
+- Gmail: Find Email
+- Gmail: Delete Email
+
+Purpose: Full quarantine from both calendar and inbox.
+
+#### Path B — Approved (allow + normalize)
+
+Condition: `Decision = Approved`
+
+Actions:
+
+- Google Calendar: Mark Event as Accepted
+
+Purpose: Explicitly confirm legitimate meetings.
+
+#### Path C — Cancelled (close-out hygiene)
+
+Condition: `Decision = Cancelled`
+
+Actions:
+
+- Google Calendar: Update RSVP status to non-attending
+
+Purpose: Keep calendar state consistent and resolved.
+
+#### One-line summary
+
+**Notion decides, Zapier enforces.**
