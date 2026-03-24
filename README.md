@@ -30,6 +30,11 @@ When a new external invite is received in Google Workspace, the Notion Agent ini
 - **The Oracle (Data Authority):** A deterministic registry that returns trust scores and verification status for any given email.
 - **Edge Caching:** Resulting verdicts are cached in Cloudflare KV for sub-second performance.
 
+Oracle lookup behavior:
+- Checks explicit **email allowlist** entries first.
+- Falls back to **whitelisted domain** matches when no exact email record exists.
+- Returns `Unverified` for unknown emails/domains.
+
 ### 2. The Waiting Room (Governance)
 
 Unverified contacts (**Identity Phantoms**) or meetings tied to archived projects (**Ghost Projects**) are moved to a quarantine state.
