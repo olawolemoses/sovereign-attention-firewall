@@ -44,6 +44,7 @@ Final actions are executed through a multi-path Zapier webhook bridge.
 ![Zapier Enforcement Structure](./assets/Zapier-Enforcement-Structure.png)
 
 - **Path A (Reject/Block):** Deletes the calendar event and permanently scrubs the source email from Gmail, with no signal sent to the sender. This prevents sender verification loops and avoids confirming that the email guess is active.
+  Use of `sendUpdates: false` during silent deletions ensures that no activity signals are leaked back to unverified senders.
 - **Path B (Approve):** Formally accepts the RSVP via a `PATCH` request to preserve event metadata.  
   Code: [`zapier-enforcement/mark-event-accepted.ts`](./zapier-enforcement/mark-event-accepted.ts)
 - **Path C (Cancel):** Formally declines the invite, signaling a professional boundary.  
@@ -128,6 +129,7 @@ Create a Zap that receives Notion decisions and executes final enforcement.
   - **Paths by Zapier** split by decision
 - Path A: **Blocked / Rejected**
   - Google Calendar: Delete Event
+    - Use `sendUpdates: false` to enforce silent deletion without notifying sender
   - Gmail: Find Email -> Delete Email
 - Path B: **Approved**
   - Google Calendar: Mark Event as Accepted
