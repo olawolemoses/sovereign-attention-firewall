@@ -1,16 +1,26 @@
 # Sovereign Attention Firewall
 
+Defending the developer's calendar from unverified **Calendar Snipers** and outdated **Ghost Projects** using a Zero-Trust AI perimeter.
+
 A zero-trust security perimeter for your digital focus.
 
 The **Sovereign Attention Firewall** is an automated enforcement system designed to protect your most valuable asset: your attention. Built for the Notion MCP Challenge, it identifies, quarantines, and silences **Calendar Snipers** (unverified external invites) and **Ghost Projects** (meetings tied to archived work) before they ever interrupt deep work.
 
-[📺 Video Demo](#) | [📝 Dev.to Submission](#)
+[📺 Video Demo](#) | [📝 Dev.to Submission](#) | [📋 Duplicate Notion Template](#)
+
+## 🧾 Terminology
+
+- **Identity Phantom:** A meeting invite from an untrusted, unknown, or suspicious organizer.
+- **Ghost Project:** A meeting linked to a project that is already archived or completed.
 
 ## 🏛️ System Architecture
 
 The firewall operates as a distributed security circuit between Google Workspace, a custom Cloudflare-hosted MCP, Notion, and Zapier.
 
-![System Architecture](./assets/system_architecture.png)
+![System Architecture](./assets/architecture-diagram.png)
+
+Raw image URL (for external references):  
+`https://raw.githubusercontent.com/olawolemoses/sovereign-attention-firewall/main/assets/architecture-diagram.png`
 
 ### 1. The Oracle & Bouncer (Verification)
 
@@ -95,6 +105,8 @@ Connect the Notion MCP to your workspace and configure Sovereign Attention Firew
   - **🚫 Block List DB** (persistent deny list by sender/domain)
   - **📂 Projects DB** (used for Ghost Project detection)
 - Add `instructions.md` (The Constitution) to the Agent system prompt.
+- The logic governing the Agent's behavior is defined in the **Sovereign Constitution**: [`notion-governance/Instructions.md`](./notion-governance/Instructions.md).  
+  This ensures the AI respects human-in-the-loop decisions and never re-audits a locked state.
 - Configure integrations:
   - **Google Calendar (Notion Calendar):** read + write for next-24h scanning and enforcement actions
   - **Gmail (Notion Mail):** draft-only verification messages when context is missing
