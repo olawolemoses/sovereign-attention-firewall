@@ -1,0 +1,9 @@
+# Local environment files
+.env
+.env.*
+.dev.vars
+.dev.vars.*
+
+# Wrangler local state
+.wrangler/
+

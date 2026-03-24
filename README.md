@@ -53,7 +53,22 @@ cd identity-oracle && wrangler deploy
 cd sovereign-bouncer-mcp && wrangler deploy
 ```
 
-Set your `SOVEREIGN_SECRET` with Wrangler secrets before deploying.
+Create a KV namespace for trust caching, then set its ID in `sovereign-bouncer-mcp/wrangler.jsonc` for `SOVEREIGN_KV`:
+
+```bash
+cd sovereign-bouncer-mcp
+wrangler kv namespace create SOVEREIGN_KV
+```
+
+Copy the returned namespace `id` and replace `REPLACE_WITH_YOUR_SOVEREIGN_KV_ID` in `wrangler.jsonc`.
+
+Set runtime values as Wrangler secrets before deploying.
+
+```bash
+cd sovereign-bouncer-mcp
+wrangler secret put SOVEREIGN_SECRET
+wrangler secret put IDENTITY_ORACLE_URL
+```
 
 ### 2. Notion Agent
 
@@ -71,6 +86,16 @@ Set your `SOVEREIGN_SECRET` with Wrangler secrets before deploying.
 - **Silence is Security:** The system never “declines” a phantom. It deletes silently (`sendUpdates=false`) so spammers never get a signal that your address is active.
 - **2-Strike Escalation:** If a sender is manually rejected twice in Notion, they are automatically promoted to the 🚫 Block List DB for future hard denials.
 - **Contextual Integrity:** If a project is marked “Archived” in Notion, all related future meetings are automatically treated as Ghost Projects.
+
+## 🔐 Environment Strategy (GitHub Safe)
+
+- Do not commit real environment values in `wrangler.jsonc`.
+- Store sensitive and deployment-specific values as Cloudflare secrets:
+  - `SOVEREIGN_SECRET`
+  - `IDENTITY_ORACLE_URL`
+- Do not commit real Cloudflare resource IDs (for example KV namespace IDs). Keep placeholders in Git and set real IDs per environment.
+- Keep local-only files (`.env*`, `.dev.vars*`, `.wrangler/`) out of Git via `.gitignore`.
+- If you need to share required keys with collaborators, document key names only, not key values.
 
 ## 🏆 Notion MCP Challenge
 
