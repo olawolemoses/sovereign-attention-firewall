@@ -53,14 +53,14 @@ Final actions are executed through a multi-path Zapier webhook bridge.
 
 ### 1. Cloudflare Workers
 
-Deploy the Oracle and Bouncer:
+Deploy in this order:
 
 ```bash
-cd identity-oracle && wrangler deploy
-cd sovereign-bouncer-mcp && wrangler deploy
+cd identity-oracle
+wrangler deploy
 ```
 
-Create a KV namespace for trust caching, then set its ID in `sovereign-bouncer-mcp/wrangler.jsonc` for `SOVEREIGN_KV`:
+Copy the Oracle URL from deploy output, then prepare the bouncer:
 
 ```bash
 cd sovereign-bouncer-mcp
@@ -69,12 +69,13 @@ wrangler kv namespace create SOVEREIGN_KV
 
 Copy the returned namespace `id` and replace `REPLACE_WITH_YOUR_SOVEREIGN_KV_ID` in `wrangler.jsonc`.
 
-Set runtime values as Wrangler secrets before deploying.
+Set runtime values as Wrangler secrets before deploying the bouncer:
 
 ```bash
 cd sovereign-bouncer-mcp
 wrangler secret put SOVEREIGN_SECRET
 wrangler secret put IDENTITY_ORACLE_URL
+wrangler deploy
 ```
 
 ### 2. Notion Agent
