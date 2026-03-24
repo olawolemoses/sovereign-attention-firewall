@@ -133,16 +133,6 @@ One-line operating model: **Notion decides, Zapier enforces.**
 - **2-Strike Escalation:** If a sender is manually rejected twice in Notion, they are automatically promoted to the 🚫 Block List DB for future hard denials.
 - **Contextual Integrity:** If a project is marked “Archived” in Notion, all related future meetings are automatically treated as Ghost Projects.
 
-## 🔐 Environment Strategy (GitHub Safe)
-
-- Do not commit real environment values in `wrangler.jsonc`.
-- Store sensitive and deployment-specific values as Cloudflare secrets:
-  - `SOVEREIGN_SECRET`
-  - `IDENTITY_ORACLE_URL`
-- Do not commit real Cloudflare resource IDs (for example KV namespace IDs). Keep placeholders in Git and set real IDs per environment.
-- Keep local-only files (`.env*`, `.dev.vars*`, `.wrangler/`) out of Git via `.gitignore`.
-- If you need to share required keys with collaborators, document key names only, not key values.
-
 ## 🏆 Notion MCP Challenge
 
 This project demonstrates Notion as an orchestration layer for complex, distributed AI systems. By bridging edge compute (Cloudflare) and workplace automation (Zapier), it creates a system that doesn't just organize work; it defends it.
