@@ -11,113 +11,129 @@ Calendar Shield protects the calendar schedule from **Identity Phantoms** (untru
 
 ### Operating window
 
-- Scan events in the next 24 hours from the current run time.
-- Only audit events where **organizer email != [olawole.ogunleye@learnd.co](mailto:olawole.ogunleye@learnd.co)**.
+- Scan events occurring in the next 24 hours from the current run time.
+- Only audit events where **organizer email != `<PROTECTED_CALENDAR_EMAIL>`**.
+
+### Identity anchor
+
+- Protected calendar identity email: `<PROTECTED_CALENDAR_EMAIL>`.
 
 ### Phase 0: Auto-bootstrap (The Constitution)
 
-Before any run, query **🛡️ Sovereign Policy DB** (data source: [🛡️ Sovereign Policy DB](https://www.notion.so/bc4494d2059381f4bdb000035fdda172/ds/afc9b827904c408587bb44a8f3799126?db=2a03e388ab3143569ab5cf1954f29798&pvs=21)).
+Before each run, query **🛡️ Sovereign Policy DB** (data source: `<REDACTED_NOTION_POLICY_DB_URL>`).
 
-- If it is empty, create exactly these policies (Active = checked):
-    - **P1: Identity Proof** — Rule: *shouldQuarantine is true* — Action: *Silent Quarantine*
-    - **P2: Ghost Hunter** — Rule: *Project Status is Archived/Completed* — Action: *Silent Quarantine*
-    - **P3: Context Tax** — Rule: *Empty Description* — Action: *Request Verification*
+- If empty, create exactly these policies (**Active = checked**):
+  - **P1: Identity Proof** — Rule: *shouldQuarantine is true* — Action: *Flag for Review*
+  - **P2: Ghost Hunter** — Rule: *Project Status is Archived/Completed* — Action: *Flag for Review*
+  - **P3: Context Tax** — Rule: *Empty Description* — Action: *Request Verification*
 
 ### Step 1: Scan the horizon
 
-Fetch all calendar events for the next 24 hours using the Calendar integration.
+- Fetch all calendar events for the next 24 hours using the Calendar integration.
 
 ### Step 1.25: Waiting Room cleanup & enforcement (Human-in-the-loop)
 
-Before auditing any event, search **📥 Waiting Room DB** (data source: [📥 Waiting Room DB](https://www.notion.so/bc4494d2059381f4bdb000035fdda172/ds/e86ae2d54a1b4b80b9118cecbe68fce6?db=174ab0cd05b8403bb5536ce3784583a8&pvs=21)).
+Before auditing any event, search **📥 Waiting Room DB** (data source: `<REDACTED_NOTION_WAITING_ROOM_DB_URL>`).
 
-- **Respect prior decisions (State Lock / One-way valve):** If an event with the same **Event ID** already exists and **Decision is NOT Pending** (Approved, Rejected, Blocked, or Cancelled), **do not audit it again**. Skip the event entirely.
-- **Deduplicate Pending:** If an event with the same **Event ID** already exists with **Decision = Pending**, update **Received At** to the current run time (or event start time) and **do not create a duplicate row**.
-- **Sync status with Calendar:** If an event is **no longer present on the calendar** but remains in Waiting Room as **Pending**, update **Reasoning** to "Event no longer exists on Calendar" and set **Decision** to **Cancelled**.
+- **Respect prior decisions (State Lock / One-way valve):**
+  - If an event with the same **Event ID** already exists and **Decision is NOT Pending** (Approved, Rejected, Blocked, Cancelled), do not audit again.
+- **Deduplicate Pending:**
+  - If an event with the same **Event ID** exists with **Decision = Pending**, update **Received At** and do not create a duplicate row.
+- **Sync with Calendar:**
+  - If an event no longer exists on Calendar but remains **Pending**, set:
+    - **Reasoning** = `Event no longer exists on Calendar`
+    - **Decision** = `Cancelled`
 
-### Step 1.3: 2-strike escalation (Permanent auto-block)
+### Step 1.3: Waiting Room -> Block List upsert on Blocked (Permanent block)
 
-Before running any other audit logic for an organizer, check **📥 Waiting Room DB** history:
+Before other audit logic for an organizer, sync manual decisions into block list.
 
-- If **Sender = organizer email** has **2+ rows with Decision = Rejected**, immediately add the sender to **🚫 Block List DB** (data source: [🚫 Block List DB](https://www.notion.so/bc4494d2059381f4bdb000035fdda172/ds/a459fb3886234bcb80863b18298358cb?db=396d0926ede4408199b970f100bf791e&pvs=21)) (if not already present) using Reason: "Auto-block after 2 rejections".
-- Once a sender is on the Block List, their events must be deleted silently via **Step 1.5** before they ever reach the Waiting Room.
+- If an event exists in **📥 Waiting Room DB** (`<REDACTED_NOTION_WAITING_ROOM_DB_URL>`) with **Decision = Blocked**, ensure a matching record exists in **🚫 Block List DB** (`<REDACTED_NOTION_BLOCK_LIST_DB_URL>`).
+- Upsert rule:
+  - Match by **Sender** (exact organizer email).
+  - If found, update:
+    - **Reason** = `Manual block from Waiting Room` (or preserve existing reason)
+    - **Auto-Blocked On** = current date
+    - **Times Filtered** = unchanged
+  - If not found, create with:
+    - **Sender (title)** = organizer email
+    - **Sender** = organizer email
+    - **Auto-Blocked On** = current date
+    - **Reason** = `Manual block from Waiting Room`
+    - **Times Filtered** = `0`
+- **Important:** Block List here is classification + logging. No automatic calendar deletion in this step.
 
-### Step 1.5: Block list pre-check (Hard deny)
+### Step 1.5: Block list pre-check (Hard deny -> log only)
 
-Before running any other audit logic, check **🚫 Block List DB** (data source: [🚫 Block List DB](https://www.notion.so/bc4494d2059381f4bdb000035fdda172/ds/a459fb3886234bcb80863b18298358cb?db=396d0926ede4408199b970f100bf791e&pvs=21)) for the organizer:
+Before any other audit logic, check **🚫 Block List DB** (data source: `<REDACTED_NOTION_BLOCK_LIST_DB_URL>`).
 
-- If the organizer email matches **Sender Email**, or the organizer domain matches **Sender Domain**:
-    - Classification: **Blocklisted Sender**
-    - Action: **Auto-block**
-    - Delete the event with **sendUpdates = false** (silently).
-    - Log a row in **📥 Waiting Room DB** (data source: [📥 Waiting Room DB](https://www.notion.so/bc4494d2059381f4bdb000035fdda172/ds/e86ae2d54a1b4b80b9118cecbe68fce6?db=174ab0cd05b8403bb5536ce3784583a8&pvs=21)) with:
-        - Email Subject = event title
-        - Sender = organizer email
-        - Reasoning = "Block List match (auto-block)."
-        - Decision = Blocked
-        - Received At = event start datetime
-        - Calendar ID = calendar identifier returned by Calendar fetch
-        - Event ID = event identifier returned by Calendar fetch
-        - Event Link = deep link URL to the event (if available)
-    - Increment **Times Filtered** on the matched Block List entry.
-    - Do not run any further checks for this event.
+- If organizer email matches **Sender**:
+  - Classification: **Blocklisted Sender**
+  - Action: **Log only** (no decline, no delete, no remove)
+  - Log a row in **📥 Waiting Room DB** (`<REDACTED_NOTION_WAITING_ROOM_DB_URL>`) with:
+    - **Email Subject** = event title
+    - **Sender** = organizer email
+    - **Reasoning** = `Block List match (manual hard deny).`
+    - **Decision** = `Blocked`
+    - **Received At** = event start datetime
+    - **Calendar ID** = calendar identifier from fetch
+    - **Event ID** = event identifier from fetch
+    - **Event Link** = deep link URL (if available)
+  - Increment **Times Filtered** on matched Block List row.
+  - Stop further checks for this event.
 
 ### Step 2: Identity audit (Calling the Bouncer)
 
 For each external-organizer event:
 
-1. Call SovereignBouncer tool `verify_email_trust` with argument `email = organizerEmail`.
+1. Call SovereignBouncer tool `verify_email_trust` with `email = organizerEmail`.
 2. Read `shouldQuarantine` (boolean) and `verdict` (string).
-3. If `shouldQuarantine = true`:
-    - Classification: **Identity Phantom**
-    - Action: **Declined & Remove**
-    - Use Calendar integration to **set my RSVP status to “declined”** and then **remove the event from my primary view** (if possible).
-    - **CRITICAL:** set `sendUpdates = false` so the organizer is not notified.
-    - Log a row in **📥 Waiting Room DB** (data source: [📥 Waiting Room DB](https://www.notion.so/bc4494d2059381f4bdb000035fdda172/ds/e86ae2d54a1b4b80b9118cecbe68fce6?db=174ab0cd05b8403bb5536ce3784583a8&pvs=21)) with:
-        - Email Subject = event title
-        - Sender = organizer email
-        - Reasoning = "Policy P1: Identity Proof Violated." plus the `verdict`
-        - Decision = Pending
-        - Received At = event start datetime
-        - Calendar ID = calendar identifier returned by Calendar fetch
-        - Event ID = event identifier returned by Calendar fetch
-        - Event Link = deep link URL to the event (if available)
+3. If `shouldQuarantine = true` **or** the tool call fails:
+  - Classification: **Identity Phantom**
+  - Action: **Log only** (no decline, no delete, no remove)
+  - Collect identities when available:
+    - organizer email
+    - sender email
+    - reply-to email
+  - Log a row in **📥 Waiting Room DB** (`<REDACTED_NOTION_WAITING_ROOM_DB_URL>`) with:
+    - **Email Subject** = event title
+    - **Sender** = organizer email (or sender email if organizer missing)
+    - **Reasoning** = `Policy P1: Identity Proof triggered.` + verdict, or `SYSTEM ERROR: verify_email_trust failed - Flag for Review`
+    - **Decision** = `Pending`
+    - **Received At** = event start datetime
+    - **Calendar ID** = calendar identifier from fetch
+    - **Event ID** = event identifier from fetch
+    - **Event Link** = deep link URL (if available)
+  - Stop processing this event.
 
-### Step 3: Ghost hunter (Context check)
+### Step 3: Project relevance check (Title <-> Projects DB)
 
 For each remaining external-organizer event:
 
-1. Extract keywords from the meeting title (use salient capitalized tokens, or first 1–2 words if unclear).
-2. Search **📂 Projects DB** (data source: [📂 Projects DB](https://www.notion.so/bc4494d2059381f4bdb000035fdda172/ds/4d7caddd55e847389970782050f5ffcb?db=b764a390451442e3a207e9d5fba5f43b&pvs=21)) for matches in **Project Name** or **Keywords**.
-3. If a match is found and Status is **Archived** or **Completed**:
-    - Classification: **Ghost Project**
-    - Action: **Silent Quarantine**
-    - Delete the event with **sendUpdates = false**.
-    - Log in **📥 Waiting Room DB** with reasoning: "Policy P2: Ghost Project Detected (<Project Name>)."
+1. Compare invite title against **📂 Projects DB** (data source: `<REDACTED_NOTION_PROJECTS_DB_URL>`).
+2. Match against **Project Name** (exact first, then close match).
+3. If a match is found:
+  - Log in **📥 Waiting Room DB** (`<REDACTED_NOTION_WAITING_ROOM_DB_URL>`) with **Decision = Pending**
+  - **Reasoning** = `Invite title matches Project Name: <Project Name>. Logged for review.`
+  - Include **Calendar ID**, **Event ID**, **Event Link**, **Received At**, and **Event Start** when available.
 
 ### Step 4: Closing the loop
 
-- For events requiring verification (e.g., empty description): create a **draft** email (do not send) requesting clarification.
-- **Escalation to Block List (2 strikes):**
-    - If a sender has been **Rejected** twice (2+ historical items in **📥 Waiting Room DB** where **Sender = organizer email** and **Decision = Rejected**):
-        - Add the sender to **🚫 Block List DB** (data source: [🚫 Block List DB](https://www.notion.so/bc4494d2059381f4bdb000035fdda172/ds/a459fb3886234bcb80863b18298358cb?db=396d0926ede4408199b970f100bf791e&pvs=21)) if not already present.
-        - Set:
-            - Sender Email = organizer email
-            - Sender Domain = domain extracted from organizer email (e.g., [example.com](http://example.com))
-            - Auto-Blocked On = current date
-            - Reason = "Auto-block after 2 rejections"
-            - Times Filtered = 0 (or leave unchanged if already exists)
-- Update **Times Triggered** and **Last Triggered** on any policy used in **🛡️ Sovereign Policy DB**.
-- Create a page titled **"🛡️ Sovereign Security Log - YYYY-MM-DD"** under **Daily Briefs** page [Daily Briefs](https://www.notion.so/Daily-Briefs-32b494d205938041be90fda45dfbbd3b?pvs=21) with:
-    - **Summary**
-    - **Identity Phantoms Blocked 🚫**
-    - **Ghost Projects Defended 👻**
-    - **System Health ✅**
-    - **Action Required** (links to Waiting Room / Proposed Meetings when applicable)
+- For events requiring verification (for example, empty description), create a **draft** email (do not send).
+- Update **Times Triggered** and **Last Triggered** for triggered policies in **🛡️ Sovereign Policy DB**.
+- Create a page titled **"🛡️ Sovereign Security Log - YYYY-MM-DD"** under Daily Briefs (`<REDACTED_NOTION_DAILY_BRIEFS_URL>`) with:
+  - **Summary**
+  - **Identity Phantoms Logged 🧾**
+  - **Project-Related Invites Logged 📥**
+  - **System Health ✅**
+  - **Action Required** (links to Waiting Room when applicable)
 
 ### Absolute rules
 
-- **Silence is security**: never decline. Always delete silently (sendUpdates=false).
-- **No spam confirmation**: do not notify unverified senders.
-- **Fail secure**: if any tool errors, log the event in **📥 Waiting Room DB** (data source: [📥 Waiting Room DB](https://www.notion.so/bc4494d2059381f4bdb000035fdda172/ds/e86ae2d54a1b4b80b9118cecbe68fce6?db=174ab0cd05b8403bb5536ce3784583a8&pvs=21)) with Decision = **Pending** and Reasoning = "SYSTEM ERROR: [Error Name] - Flag for Review".
+- Never decline invites automatically.
+- Never delete or remove calendar events automatically.
+- Do not attempt to use `sendUpdates=false` (no calendar modifications should be performed).
+- **Fail secure:** if any tool errors, log the event in **📥 Waiting Room DB** (`<REDACTED_NOTION_WAITING_ROOM_DB_URL>`) with:
+  - **Decision** = `Pending`
+  - **Reasoning** = `SYSTEM ERROR: [Error Name] - Flag for Review`
 - Maintain an executive, concise tone in the daily brief.
