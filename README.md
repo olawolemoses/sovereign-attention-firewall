@@ -6,7 +6,7 @@ A zero-trust security perimeter for your digital focus.
 
 The **Sovereign Attention Firewall** is an automated enforcement system designed to protect your most valuable asset: your attention. Built for the Notion MCP Challenge, it identifies, quarantines, and silences **Calendar Snipers** (unverified external invites) and **Ghost Projects** (meetings tied to archived work) before they ever interrupt deep work.
 
-[📺 Video Demo](#) | [📝 Dev.to Submission](#) | [📋 Duplicate Notion Template](#)
+[📺 Video Demo](https://youtu.be/SaMDaOk9Etc) | [📝 Submission Draft](./submission.md) | [📋 Duplicate Notion Template](#)
 
 ## 🧾 Terminology
 
@@ -41,11 +41,15 @@ Unverified contacts (**Identity Phantoms**) or meetings tied to archived project
 
 - **Decision Desk:** Invites are logged into the 📥 Waiting Room DB in Notion for human review.
 - **State-Lock:** Once a human decision is made, the Agent locks that state so AI never overrides a manual choice.
+- **Decision Triggering:** Updating `Decision` in 📥 Waiting Room DB triggers downstream automations.
+
+![Waiting Room Automation Trigger — Blocked](./assets/waiting-room-automation-trigger-blocked.png)
 
 ### 3. The Enforcement Engine (Execution)
 
 Final actions are executed through a multi-path Zapier webhook bridge.
 
+![Waiting Room Automation Trigger — Zapier](./assets/waiting-room-automation-trigger-zapier.png)
 ![Zapier Enforcement Structure](./assets/Zapier-Enforcement-Structure.png)
 
 - **Path A (Reject/Block):** Deletes the calendar event and permanently scrubs the source email from Gmail, with no signal sent to the sender. This prevents sender verification loops and avoids confirming that the email guess is active.
@@ -144,6 +148,16 @@ Create a Zap that receives Notion decisions and executes final enforcement.
   - Code: [`zapier-enforcement/mark-event-declined.ts`](./zapier-enforcement/mark-event-declined.ts)
 
 One-line operating model: **Notion decides, Zapier enforces.**
+
+## 🧪 Submission Artifacts
+
+The repository includes challenge-ready artifacts referenced in `submission.md`:
+
+- **System architecture diagram:** [`assets/architecture-diagram.png`](./assets/architecture-diagram.png)
+- **Waiting Room trigger to Block List automation:** [`assets/waiting-room-automation-trigger-blocked.png`](./assets/waiting-room-automation-trigger-blocked.png)
+- **Waiting Room trigger to Zapier webhook:** [`assets/waiting-room-automation-trigger-zapier.png`](./assets/waiting-room-automation-trigger-zapier.png)
+- **Zapier routing diagram:** [`assets/Zapier-Enforcement-Structure.png`](./assets/Zapier-Enforcement-Structure.png)
+- **Governance placeholders:** `assets/placeholders/*`
 
 ## 📸 Notion Governance Screenshots (Placeholders)
 

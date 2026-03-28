@@ -222,7 +222,7 @@ Four Notion databases maintain the complete operational state of the system:
 
 The Custom Notion Agent operates from explicit policy records in the **🛡️ Sovereign Policy DB** — `P1: Identity Proof`, `P2: Ghost Hunter`, `P3: Context Tax` — rather than ad-hoc AI judgment. Policies are readable and editable by any team member directly in Notion.
 
-![Sovereign Policy DB](./assets/placeholders/sovereign-policy-db.png)
+![Sovereign Policy DB](https://raw.githubusercontent.com/olawolemoses/sovereign-attention-firewall/main/assets/placeholders/sovereign-policy-db.png)
 
 ---
 
@@ -230,18 +230,19 @@ The Custom Notion Agent operates from explicit policy records in the **🛡️ S
 
 The **📥 Waiting Room DB** stores event metadata, policy reasoning, and decision state across every interaction. Nothing disappears into a black box — every triage decision is traceable over time.
 
-![Waiting Room DB](./assets/placeholders/waiting-room-db.png)
+![Waiting Room DB](https://raw.githubusercontent.com/olawolemoses/sovereign-attention-firewall/main/assets/placeholders/waiting-room-db.png)
 
 ---
 
 ### 3. Human-in-the-loop governance
 
-A human updates the Decision property in Notion — that single gesture triggers the entire enforcement chain downstream. The Agent Constitution enforces a **State Lock**: once a human has made a decision, the Custom Notion Agent never re-audits that event.
+A human updates the Decision property in the **📥 Waiting Room DB**, which activates the configured automation trigger chain. The Agent Constitution enforces a **State Lock**: once a human decision is recorded in Waiting Room, the Custom Notion Agent does not re-audit that event.
 
-When Decision is set to `Blocked`, a native Notion automation fires immediately — adding the sender to **Block List DB** with full metadata, without any external trigger needed.
+When Decision is set to `Blocked`, the Waiting Room trigger runs a Notion automation that upserts the sender into **🚫 Block List DB** with full metadata. This is distinct from the Zapier trigger path, which executes calendar and inbox enforcement actions for the event.
+![Waiting Room Automation Trigger — Blocked](https://raw.githubusercontent.com/olawolemoses/sovereign-attention-firewall/main/assets/waiting-room-automation-trigger-blocked.png)
 
-![Notion Automation — Blocked → Block List DB](./assets/placeholders/block-list-db.png)
-![Waiting Room Automation Trigger — Blocked](./assets/waiting-room-automation-trigger-blocked.png)
+![Notion Automation — Blocked → Block List DB](https://raw.githubusercontent.com/olawolemoses/sovereign-attention-firewall/main/assets/placeholders/block-list-db.png)
+
 
 ---
 
@@ -249,7 +250,7 @@ When Decision is set to `Blocked`, a native Notion automation fires immediately 
 
 The **📂 Projects DB** allows the Custom Notion Agent to match incoming meeting invites against archived or completed project context. A meeting tied to a project marked `Archived` in Notion is automatically treated as a Ghost Project — no manual flagging required.
 
-![Projects DB](./assets/placeholders/projects-db.png)
+![Projects DB](https://raw.githubusercontent.com/olawolemoses/sovereign-attention-firewall/main/assets/placeholders/projects-db.png)
 
 ---
 
@@ -257,8 +258,12 @@ The **📂 Projects DB** allows the Custom Notion Agent to match incoming meetin
 
 Notion decides. Zapier enforces.
 
-![Zapier Enforcement Structure](./assets/Zapier-Enforcement-Structure.png)
-![Waiting Room Automation Trigger — Zapier](./assets/waiting-room-automation-trigger-zapier.png)
+When a Decision is updated in the **📥 Waiting Room DB** (for example `Approved`, `Rejected`, `Blocked`, or `Cancelled`), that change triggers the Zapier webhook route for execution.
+
+![Waiting Room Automation Trigger — Zapier](https://raw.githubusercontent.com/olawolemoses/sovereign-attention-firewall/main/assets/waiting-room-automation-trigger-zapier.png)
+
+![Zapier Enforcement Structure](https://raw.githubusercontent.com/olawolemoses/sovereign-attention-firewall/main/assets/Zapier-Enforcement-Structure.png)
+
 
 Three enforcement paths execute based on the human's decision in Notion:
 
@@ -340,7 +345,7 @@ export async function updateEventRSVPStatus({
 
 The **Sovereign Security Log** auto-generates a daily brief in Notion — phantoms blocked, ghost projects defended, system health status — giving you full situational awareness without opening a dashboard.
 
-![Sovereign Security Log](./assets/placeholders/sovereign-security-log.png)
+![Sovereign Security Log](https://raw.githubusercontent.com/olawolemoses/sovereign-attention-firewall/main/assets/placeholders/sovereign-security-log.png)
 
 ---
 
